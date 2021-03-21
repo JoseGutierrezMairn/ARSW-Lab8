@@ -1,5 +1,5 @@
 var app = (function () {
-
+	var numDibujo=null;
     class Point{
         constructor(x,y){
             this.x=x;
@@ -36,7 +36,7 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (eventbody) {
+            stompClient.subscribe('/topic/newpoint'+numDibujo, function (eventbody) {
 				
                 var theObject = JSON.parse(eventbody.body);
 				alert(theObject.x+"  totr "+ theObject.y);
@@ -46,9 +46,6 @@ var app = (function () {
                 ctx.beginPath();
                 ctx.arc(punto.x, punto.y, 3, 0, 2 * Math.PI);
                 ctx.stroke();
-				callback(
-                    new Point(theObject.x, theObject.y)
-                );
 				
                 
             });
@@ -62,18 +59,38 @@ var app = (function () {
 
         init: function () {
             var can = document.getElementById("canvas");
+            numDibujo = document.getElementById("numDibujo");
+			
+			if(numDibujo.value!=""){
+				//websocket connection
+				var c2 = canvas.getContext('2d');
+				c2.clearRect(0, 0, 800, 600);
+				connectAndSubscribe();
+				
+			}else{
+				alert("Número de dibujo inválido");
+			}
+			
             
-            //websocket connection
-            connectAndSubscribe();
+            
         },
 
         publishPoint: function(px,py){
-            var pt=new Point(px,py);
-            console.info("publishing point at "+pt);
-            addPointToCanvas(pt);
-
-            //publicar el evento
-			stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
+			if(px=="" || py ==""){
+				alert("No pueden haber puntos sin valor");
+			}else{
+				if(numDibujo==null){
+					alert("Conéctese a un número de dibujo para agregar puntos");
+				}else{
+					var pt=new Point(px,py);
+					console.info("publishing point at "+pt);
+					addPointToCanvas(pt);
+					//publicar el evento
+					stompClient.send("/topic/newpoint"+numDibujo, {}, JSON.stringify(pt));
+				}
+				
+			}
+            
         },
 
         disconnect: function () {
