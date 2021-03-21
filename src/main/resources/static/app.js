@@ -40,6 +40,10 @@ var app = (function () {
 				
                 var theObject = JSON.parse(eventbody.body);
 				alert(theObject.x+"  totr "+ theObject.y);
+				callback(
+                    new Point(theObject.x, theObject.y)
+                );
+				
                 
             });
         });
