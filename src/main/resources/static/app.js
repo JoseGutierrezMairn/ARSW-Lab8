@@ -40,6 +40,12 @@ var app = (function () {
 				
                 var theObject = JSON.parse(eventbody.body);
 				alert(theObject.x+"  totr "+ theObject.y);
+				var punto = new Point(theObject.x, theObject.y);
+                var canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                ctx.beginPath();
+                ctx.arc(punto.x, punto.y, 3, 0, 2 * Math.PI);
+                ctx.stroke();
 				callback(
                     new Point(theObject.x, theObject.y)
                 );
