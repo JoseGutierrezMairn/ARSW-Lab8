@@ -36,7 +36,7 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint'+numDibujo, function (eventbody) {
+            stompClient.subscribe('/topic/newpoint.'+numDibujo, function (eventbody) {
 				
                 var theObject = JSON.parse(eventbody.body);
 				alert(theObject.x+"  totr "+ theObject.y);
@@ -49,8 +49,30 @@ var app = (function () {
 				
                 
             });
-        });
+			
+			stompClient.subscribe('/topic/newpolygon.'+idBlueprint, function (eventbody) {
+                var anterior = null;
+                var theObject = JSON.parse(eventbody.body);
+                var c2 = canvas.getContext('2d');
 
+                c2.fillStyle = '#f00';
+                c2.beginPath();
+                theObject.map(function (value, index ){
+                    if (anterior == null ){
+                        anterior = value;
+                        c2.moveTo(anterior.x, anterior.y);
+                    }
+                    else {
+                        c2.lineTo(value.x,value.y);
+                    }
+                    //addPointToCanvas(value);
+                });
+
+                c2.closePath();
+                c2.fill();
+            })
+        });
+		app.disconnect();
     };
     
     
@@ -86,7 +108,8 @@ var app = (function () {
 					console.info("publishing point at "+pt);
 					addPointToCanvas(pt);
 					//publicar el evento
-					stompClient.send("/topic/newpoint"+numDibujo, {}, JSON.stringify(pt));
+					//stompClient.send("/topic/newpoint."+numDibujo, {}, JSON.stringify(pt));
+					stompClient.send("/app/newpoint."+numDibujo, {}, JSON.stringify(pt));
 				}
 				
 			}
